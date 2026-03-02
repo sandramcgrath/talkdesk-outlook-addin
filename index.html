@@ -11,66 +11,16 @@ body {
   background: #f7f7f9;
 }
 
-h2 {
-  margin-bottom: 10px;
-}
+h2 { margin-bottom: 5px; }
+h3 { margin: 10px 0; }
 
-.section {
-  margin-bottom: 20px;
-}
-
-input[type="text"],
-input[type="date"] {
+input, select, textarea {
   width: 100%;
   padding: 8px;
   margin-top: 5px;
+  margin-bottom: 12px;
   border: 1px solid #ccc;
   border-radius: 6px;
-}
-
-.time-group {
-  margin-top: 10px;
-}
-
-.time-label {
-  font-weight: 600;
-  margin: 10px 0 5px;
-}
-
-.slots {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.slot {
-  padding: 6px 12px;
-  border-radius: 20px;
-  background: #e4e4e7;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.slot:hover {
-  background: #d4d4d8;
-}
-
-.slot.selected {
-  background: #6b21a8;
-  color: white;
-}
-
-.summary {
-  background: #ececf1;
-  padding: 12px;
-  border-radius: 8px;
-  font-size: 14px;
-}
-
-.buttons {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 20px;
 }
 
 button {
@@ -90,144 +40,259 @@ button {
   border: 1px solid #6b21a8;
   color: #6b21a8;
 }
+
+.buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.slots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.slot {
+  padding: 6px 12px;
+  border-radius: 20px;
+  background: #e4e4e7;
+  cursor: pointer;
+}
+
+.slot.selected {
+  background: #6b21a8;
+  color: white;
+}
+
+.type-option {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  cursor: pointer;
+}
+
+.type-option.selected {
+  border: 2px solid #6b21a8;
+  background: #f3f0ff;
+}
+
+.modal {
+  position: fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  background: rgba(0,0,0,0.5);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.modal-content {
+  background:white;
+  padding:20px;
+  border-radius:10px;
+  width:300px;
+}
 </style>
 </head>
 
 <body>
 
+<h3>Step <span id="step-indicator">1</span> of 4</h3>
 <h2>New Appointment</h2>
 
-<div class="section">
-  <label>Customer Name *</label>
-  <input type="text" id="customer" />
+<!-- STEP 1 -->
+<div id="step-1">
 
-  <button 
-    onclick="loadProspect()" 
-    style="margin-top:8px; width:100%;"
-    class="secondary">
-    Load Selected Prospect
-  </button>
+<label>Customer Name *</label>
+<input type="text" id="customer" />
+
+<button class="secondary" onclick="loadProspect()">Load Selected Prospect</button>
+
+<label>Select Specialist *</label>
+<select id="specialist">
+  <option value="">-- Select Specialist --</option>
+  <option>Sandra M</option>
+  <option>David R</option>
+  <option>Priya K</option>
+  <option>James L</option>
+</select>
+
+<label>Select Date *</label>
+<input type="date" id="date" />
+
+<label>Select Time *</label>
+<div class="slots" id="time-slots"></div>
+
 </div>
 
-<div class="section">
-  <label>Select Specialist *</label>
-  <select id="specialist" onchange="updateSummary()" style="width:100%; padding:8px; border-radius:6px;">
-    <option value="">-- Select Specialist --</option>
-    <option>Sandra McGrath</option>
-    <option>Shane Lowry</option>
-    <option>Rory McIlroy</option>
-    <option>Leona Maguire</option>
-  </select>
+<!-- STEP 3 -->
+<div id="step-3" style="display:none;">
+
+<h3>Appointment Type</h3>
+
+<div class="type-option" onclick="selectType(this,'In-person')">
+  <strong>In-person</strong><br/>Visit the location
 </div>
 
-<div class="section">
-  <label>Select date *</label>
-  <input type="date" id="date" />
+<div class="type-option" onclick="selectType(this,'Remote')">
+  <strong>Remote</strong><br/>Online meeting
 </div>
 
-<div class="section">
-  <div class="time-group">
-    <div class="time-label">AM</div>
-    <div class="slots" id="am-slots"></div>
-  </div>
+<label>Email *</label>
+<input type="email" id="contact-email"/>
 
-  <div class="time-group">
-    <div class="time-label">PM</div>
-    <div class="slots" id="pm-slots"></div>
-  </div>
+<label>Phone *</label>
+<input type="text" id="contact-phone"/>
+
+<label>Notes</label>
+<textarea id="contact-notes"></textarea>
+
 </div>
 
-<div class="section summary" id="summary" style="display:none;"></div>
+<!-- STEP 4 -->
+<div id="step-4" style="display:none;">
+<h3>Appointment Summary</h3>
+<div id="review-summary"></div>
+</div>
 
 <div class="buttons">
-  <button class="secondary">Previous</button>
-  <button class="primary" onclick="schedule()">Next</button>
+  <button class="secondary" onclick="previousStep()">Previous</button>
+  <button class="primary" onclick="nextStep()">Next</button>
+</div>
+
+<!-- Modal -->
+<div id="confirmModal" class="modal" style="display:none;">
+  <div class="modal-content">
+    <h3>Create appointment?</h3>
+    <p>This will create a new appointment.</p>
+    <button onclick="closeModal()">Cancel</button>
+    <button class="primary" onclick="saveAppointment()">Save</button>
+  </div>
 </div>
 
 <script>
-const amTimes = ["09:00","09:30","10:00","10:30","11:00","11:30"];
-const pmTimes = ["12:00","12:30","01:00","01:30","02:00","02:30","03:00","03:30","04:00","04:30"];
 
+Office.onReady(() => {});
+
+let currentStep = 1;
 let selectedTime = null;
 
-function createSlots(times, containerId) {
-  const container = document.getElementById(containerId);
+let appointment = {
+  customer: "",
+  specialist: "",
+  date: "",
+  time: "",
+  type: "In-person",
+  email: "",
+  phone: "",
+  notes: ""
+};
+
+const times = ["09:00","09:30","10:00","10:30","11:00","11:30",
+               "12:00","12:30","01:00","01:30","02:00","02:30"];
+
+function createSlots() {
+  const container = document.getElementById("time-slots");
   times.forEach(time => {
     const div = document.createElement("div");
     div.className = "slot";
     div.innerText = time;
-    div.onclick = () => selectTime(div, time);
+    div.onclick = () => {
+      document.querySelectorAll(".slot").forEach(s => s.classList.remove("selected"));
+      div.classList.add("selected");
+      selectedTime = time;
+    };
     container.appendChild(div);
   });
 }
 
-function selectTime(element, time) {
-  document.querySelectorAll(".slot").forEach(s => s.classList.remove("selected"));
-  element.classList.add("selected");
-  selectedTime = time;
-  updateSummary();
-}
+createSlots();
 
 async function loadProspect() {
   await Excel.run(async (context) => {
-    const selectedRange = context.workbook.getSelectedRange();
-    selectedRange.load("rowIndex");
+    const selected = context.workbook.getSelectedRange();
+    selected.load("rowIndex");
     await context.sync();
 
-    const rowIndex = selectedRange.rowIndex;
-
+    const rowIndex = selected.rowIndex;
     const sheet = context.workbook.worksheets.getActiveWorksheet();
-    const fullRow = sheet.getRangeByIndexes(rowIndex, 0, 1, 12); 
-    // 12 = total columns in your sheet
-    fullRow.load("values");
+    const rowRange = sheet.getRangeByIndexes(rowIndex, 0, 1, 12);
+    rowRange.load("values");
     await context.sync();
 
-    const row = fullRow.values[0];
-
-    const firstName = row[1]; // Column B
-    const lastName = row[2];  // Column C
-
-    if (!firstName || !lastName) {
-      alert("Please select a valid prospect row.");
-      return;
-    }
-
-    document.getElementById("customer").value =
-      firstName + " " + lastName;
-
-    updateSummary();
+    const row = rowRange.values[0];
+    document.getElementById("customer").value = row[1] + " " + row[2];
   });
 }
 
-function updateSummary() {
-  const customer = document.getElementById("customer").value;
-  const date = document.getElementById("date").value;
-  const specialist = document.getElementById("specialist").value;
+function selectType(el, type) {
+  document.querySelectorAll(".type-option").forEach(o => o.classList.remove("selected"));
+  el.classList.add("selected");
+  appointment.type = type;
+}
 
-  if (!customer || !date || !selectedTime || !specialist) return;
+function nextStep() {
 
-  const summary = document.getElementById("summary");
-  summary.style.display = "block";
-  summary.innerHTML = `
-    <strong>Appointment time</strong><br/>
-    ${date} at ${selectedTime} (30 min)<br/>
-    Specialist: ${specialist}<br/>
-    Student: ${customer}
+  if (currentStep === 1) {
+    appointment.customer = document.getElementById("customer").value;
+    appointment.specialist = document.getElementById("specialist").value;
+    appointment.date = document.getElementById("date").value;
+    appointment.time = selectedTime;
+  }
+
+  if (currentStep === 3) {
+    appointment.email = document.getElementById("contact-email").value;
+    appointment.phone = document.getElementById("contact-phone").value;
+    appointment.notes = document.getElementById("contact-notes").value;
+  }
+
+  if (currentStep === 4) {
+    openModal();
+    return;
+  }
+
+  document.getElementById("step-" + currentStep).style.display = "none";
+  currentStep++;
+  document.getElementById("step-indicator").innerText = currentStep;
+  document.getElementById("step-" + currentStep).style.display = "block";
+
+  if (currentStep === 4) buildReview();
+}
+
+function previousStep() {
+  if (currentStep === 1) return;
+  document.getElementById("step-" + currentStep).style.display = "none";
+  currentStep--;
+  document.getElementById("step-indicator").innerText = currentStep;
+  document.getElementById("step-" + currentStep).style.display = "block";
+}
+
+function buildReview() {
+  document.getElementById("review-summary").innerHTML = `
+    <strong>Customer:</strong> ${appointment.customer}<br/>
+    <strong>Specialist:</strong> ${appointment.specialist}<br/>
+    <strong>Date:</strong> ${appointment.date} ${appointment.time}<br/>
+    <strong>Type:</strong> ${appointment.type}<br/>
+    <strong>Email:</strong> ${appointment.email}<br/>
+    <strong>Phone:</strong> ${appointment.phone}
   `;
 }
 
-function schedule() {
-  updateSummary();
-  alert("Mock appointment scheduled ✔");
+function openModal() {
+  document.getElementById("confirmModal").style.display = "flex";
 }
 
-document.getElementById("customer").addEventListener("input", updateSummary);
-document.getElementById("date").addEventListener("change", updateSummary);
+function closeModal() {
+  document.getElementById("confirmModal").style.display = "none";
+}
 
-createSlots(amTimes, "am-slots");
-createSlots(pmTimes, "pm-slots");
+function saveAppointment() {
+  alert("Appointment Created ✔");
+  closeModal();
+}
 
-Office.onReady(() => {});
 </script>
 
 </body>
