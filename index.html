@@ -98,12 +98,15 @@ button {
 <h2>New Appointment</h2>
 
 <div class="section">
-  <button onclick="loadProspect()">Load Selected Prospect</button>
-</div>
-
-<div class="section">
   <label>Customer Name *</label>
   <input type="text" id="customer" />
+
+  <button 
+    onclick="loadProspect()" 
+    style="margin-top:8px; width:100%;"
+    class="secondary">
+    Load Selected Prospect
+  </button>
 </div>
 
 <div class="section">
@@ -167,17 +170,31 @@ function selectTime(element, time) {
 
 async function loadProspect() {
   await Excel.run(async (context) => {
-    const range = context.workbook.getSelectedRange();
-    range.load("values");
+    const selectedRange = context.workbook.getSelectedRange();
+    selectedRange.load("rowIndex");
     await context.sync();
 
-    const row = range.values[0];
+    const rowIndex = selectedRange.rowIndex;
 
-    // Assuming column B = First Name, C = Last Name
-    const firstName = row[1];
-    const lastName = row[2];
+    const sheet = context.workbook.worksheets.getActiveWorksheet();
+    const fullRow = sheet.getRangeByIndexes(rowIndex, 0, 1, 12); 
+    // 12 = total columns in your sheet
+    fullRow.load("values");
+    await context.sync();
 
-    document.getElementById("customer").value = firstName + " " + lastName;
+    const row = fullRow.values[0];
+
+    const firstName = row[1]; // Column B
+    const lastName = row[2];  // Column C
+
+    if (!firstName || !lastName) {
+      alert("Please select a valid prospect row.");
+      return;
+    }
+
+    document.getElementById("customer").value =
+      firstName + " " + lastName;
+
     updateSummary();
   });
 }
