@@ -14,20 +14,33 @@ body {
 h2 { margin-bottom: 5px; }
 h3 { margin: 10px 0; }
 
+label {
+  display: block;
+  margin-top: 14px;
+  font-weight: 600;
+}
+
 input, select, textarea {
   width: 100%;
   padding: 8px;
   margin-top: 5px;
-  margin-bottom: 12px;
   border: 1px solid #ccc;
   border-radius: 6px;
+  box-sizing: border-box;
+}
+
+textarea {
+  margin-bottom: 12px;
 }
 
 button {
+  display: block;
+  width: 100%;
   padding: 8px 16px;
   border-radius: 6px;
   border: none;
   cursor: pointer;
+  margin-top: 10px;
 }
 
 .primary {
@@ -39,19 +52,23 @@ button {
   background: white;
   border: 1px solid #6b21a8;
   color: #6b21a8;
-  margin-bottom: 12px;
 }
 
 .buttons {
   display: flex;
-  justify-content: space-between;
+  gap: 10px;
   margin-top: 20px;
+}
+
+.buttons button {
+  width: 100%;
 }
 
 .slots {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+  margin-top: 6px;
 }
 
 .slot {
@@ -70,7 +87,7 @@ button {
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 8px;
-  margin-bottom: 8px;
+  margin-top: 10px;
   cursor: pointer;
 }
 
@@ -113,7 +130,7 @@ button {
   Load Selected Prospect
 </button>
 
-<label>Select Specialist *</label>
+<label for="specialist">Select Specialist *</label>
 <select id="specialist">
   <option value="">-- Select Specialist --</option>
   <option>Sandra M</option>
@@ -165,7 +182,7 @@ button {
   <button class="primary" onclick="nextStep()">Next</button>
 </div>
 
-<!-- MODAL -->
+<!-- CONFIRM MODAL -->
 <div id="confirmModal" class="modal" style="display:none;">
   <div class="modal-content">
     <h3>Create appointment?</h3>
