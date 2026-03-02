@@ -295,6 +295,7 @@ async function saveAppointment() {
   }
 
   await Excel.run(async (context) => {
+
     const sheet = context.workbook.worksheets.getActiveWorksheet();
 
     // Ensure Column M header exists
@@ -306,22 +307,22 @@ async function saveAppointment() {
       headerCell.values = [["Notes"]];
     }
 
-    const notesText =
-      `Appointment Scheduled\n` +
-      `Specialist: ${appointment.specialist}\n` +
-      `Date: ${appointment.date} ${appointment.time}\n` +
-      `Type: ${appointment.type}\n` +
-      `Email: ${appointment.email}\n` +
-      `Phone: ${appointment.phone}`;
+    const rowNumber = selectedRowIndex + 1; // Excel is 1-based
 
-    const notesCell = sheet.getRangeByIndexes(selectedRowIndex, 12, 1, 1);
+    const notesText =
+      `Appointment Scheduled | ` +
+      `Specialist: ${appointment.specialist} | ` +
+      `Date: ${appointment.date} ${appointment.time} | ` +
+      `Type: ${appointment.type}`;
+
+    const notesCell = sheet.getRange("M" + rowNumber);
     notesCell.values = [[notesText]];
 
     await context.sync();
   });
 
   closeModal();
-  alert("Appointment Created and Written to Notes Column ✔");
+  alert("Appointment Created and Written to Column M ✔");
 }
 
 </script>
