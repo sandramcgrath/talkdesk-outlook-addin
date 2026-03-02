@@ -98,8 +98,23 @@ button {
 <h2>New Appointment</h2>
 
 <div class="section">
+  <button onclick="loadProspect()">Load Selected Prospect</button>
+</div>
+
+<div class="section">
   <label>Customer Name *</label>
   <input type="text" id="customer" />
+</div>
+
+<div class="section">
+  <label>Select Specialist *</label>
+  <select id="specialist" onchange="updateSummary()" style="width:100%; padding:8px; border-radius:6px;">
+    <option value="">-- Select Specialist --</option>
+    <option>Sandra M</option>
+    <option>David R</option>
+    <option>Priya K</option>
+    <option>James L</option>
+  </select>
 </div>
 
 <div class="section">
@@ -150,18 +165,37 @@ function selectTime(element, time) {
   updateSummary();
 }
 
+async function loadProspect() {
+  await Excel.run(async (context) => {
+    const range = context.workbook.getSelectedRange();
+    range.load("values");
+    await context.sync();
+
+    const row = range.values[0];
+
+    // Assuming column B = First Name, C = Last Name
+    const firstName = row[1];
+    const lastName = row[2];
+
+    document.getElementById("customer").value = firstName + " " + lastName;
+    updateSummary();
+  });
+}
+
 function updateSummary() {
   const customer = document.getElementById("customer").value;
   const date = document.getElementById("date").value;
+  const specialist = document.getElementById("specialist").value;
 
-  if (!customer || !date || !selectedTime) return;
+  if (!customer || !date || !selectedTime || !specialist) return;
 
   const summary = document.getElementById("summary");
   summary.style.display = "block";
   summary.innerHTML = `
     <strong>Appointment time</strong><br/>
-    ${date} at ${selectedTime} - (30 min)<br/>
-    Specialist: Sandra M
+    ${date} at ${selectedTime} (30 min)<br/>
+    Specialist: ${specialist}<br/>
+    Student: ${customer}
   `;
 }
 
@@ -175,6 +209,8 @@ document.getElementById("date").addEventListener("change", updateSummary);
 
 createSlots(amTimes, "am-slots");
 createSlots(pmTimes, "pm-slots");
+
+Office.onReady(() => {});
 </script>
 
 </body>
