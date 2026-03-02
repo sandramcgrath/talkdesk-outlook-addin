@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+  <style>
+    body { font-family: Arial; padding: 15px; }
+    button { padding: 8px 12px; margin-top: 10px; }
+    .slot { margin: 5px 0; }
+  </style>
+</head>
+<body>
+
+<h2>Talkdesk Scheduler</h2>
+
+<label>Customer Name:</label><br/>
+<input type="text" id="customer" /><br/><br/>
+
+<strong>Available Slots:</strong><br/>
+
+<div class="slot">
+  <input type="radio" name="slot" value="10:00 AM" /> 10:00 AM
+</div>
+<div class="slot">
+  <input type="radio" name="slot" value="11:00 AM" /> 11:00 AM
+</div>
+
+<button onclick="schedule()">Schedule Appointment</button>
+
+<p id="result"></p>
+
+<script>
+  async function schedule() {
+    const customer = document.getElementById("customer").value;
+    const slot = document.querySelector('input[name="slot"]:checked');
+
+    if (!customer || !slot) {
+      alert("Please fill all fields");
+      return;
+    }
+
+    // Mock API response
+    const response = {
+      id: "mock-12345",
+      status: "confirmed",
+      slot: slot.value
+    };
+
+    document.getElementById("result").innerText =
+      "Appointment confirmed for " + customer +
+      " at " + response.slot + " ✔";
+  }
+</script>
+
+</body>
+</html>
