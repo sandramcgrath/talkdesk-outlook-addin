@@ -29,10 +29,6 @@ input, select, textarea {
   box-sizing: border-box;
 }
 
-textarea {
-  margin-bottom: 12px;
-}
-
 button {
   display: block;
   width: 100%;
@@ -43,64 +39,49 @@ button {
   margin-top: 10px;
 }
 
-.primary {
-  background: #6b21a8;
-  color: white;
-}
+.primary { background:#6b21a8; color:white; }
+.secondary { background:white; border:1px solid #6b21a8; color:#6b21a8; }
 
-.secondary {
-  background: white;
-  border: 1px solid #6b21a8;
-  color: #6b21a8;
-}
-
-.buttons {
-  display: flex;
-  gap: 10px;
-  margin-top: 20px;
-}
-
-.buttons button {
-  width: 100%;
-}
+.buttons { display:flex; gap:10px; margin-top:20px; }
+.buttons button { width:100%; }
 
 .slots {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 6px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:6px;
 }
 
 .slot {
-  padding: 6px 12px;
-  border-radius: 20px;
-  background: #e4e4e7;
-  cursor: pointer;
+  padding:6px 12px;
+  border-radius:20px;
+  background:#e4e4e7;
+  cursor:pointer;
 }
 
 .slot.selected {
-  background: #6b21a8;
-  color: white;
+  background:#6b21a8;
+  color:white;
 }
 
 .type-option {
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  margin-top: 10px;
-  cursor: pointer;
+  padding:10px;
+  border:1px solid #ccc;
+  border-radius:8px;
+  margin-top:10px;
+  cursor:pointer;
 }
 
 .type-option.selected {
-  border: 2px solid #6b21a8;
-  background: #f3f0ff;
+  border:2px solid #6b21a8;
+  background:#f3f0ff;
 }
 
 .modal {
-  position: fixed;
+  position:fixed;
   top:0; left:0;
   width:100%; height:100%;
-  background: rgba(0,0,0,0.5);
+  background:rgba(0,0,0,0.5);
   display:flex;
   align-items:center;
   justify-content:center;
@@ -186,7 +167,7 @@ button {
 <div id="confirmModal" class="modal" style="display:none;">
   <div class="modal-content">
     <h3>Create appointment?</h3>
-    <p>This will create a new appointment and update Excel.</p>
+    <p>This will create a new appointment and write to Notes column.</p>
     <button onclick="closeModal()">Cancel</button>
     <button class="primary" onclick="saveAppointment()">Save</button>
   </div>
@@ -230,7 +211,7 @@ async function loadProspect() {
     selectedRowIndex = selected.rowIndex;
 
     const sheet = context.workbook.worksheets.getActiveWorksheet();
-    const rowRange = sheet.getRangeByIndexes(selectedRowIndex, 0, 1, 12);
+    const rowRange = sheet.getRangeByIndexes(selectedRowIndex, 0, 1, 13);
     rowRange.load("values");
     await context.sync();
 
@@ -316,20 +297,31 @@ async function saveAppointment() {
   await Excel.run(async (context) => {
     const sheet = context.workbook.worksheets.getActiveWorksheet();
 
-    // Column J (index 9)
-    const statusCell = sheet.getRangeByIndexes(selectedRowIndex, 9, 1, 1);
-    statusCell.values = [["Appointment Scheduled"]];
+    // Ensure Column M header exists
+    const headerCell = sheet.getRange("M1");
+    headerCell.load("values");
+    await context.sync();
 
-    // Column L (index 11)
-    const today = new Date().toISOString().split("T")[0];
-    const contactCell = sheet.getRangeByIndexes(selectedRowIndex, 11, 1, 1);
-    contactCell.values = [[today]];
+    if (!headerCell.values[0][0]) {
+      headerCell.values = [["Notes"]];
+    }
+
+    const notesText =
+      `Appointment Scheduled\n` +
+      `Specialist: ${appointment.specialist}\n` +
+      `Date: ${appointment.date} ${appointment.time}\n` +
+      `Type: ${appointment.type}\n` +
+      `Email: ${appointment.email}\n` +
+      `Phone: ${appointment.phone}`;
+
+    const notesCell = sheet.getRangeByIndexes(selectedRowIndex, 12, 1, 1);
+    notesCell.values = [[notesText]];
 
     await context.sync();
   });
 
   closeModal();
-  alert("Appointment Created and Excel Updated ✔");
+  alert("Appointment Created and Written to Notes Column ✔");
 }
 
 </script>
