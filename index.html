@@ -1,55 +1,180 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8" />
-  <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
-  <style>
-    body { font-family: Arial; padding: 15px; }
-    button { padding: 8px 12px; margin-top: 10px; }
-    .slot { margin: 5px 0; }
-  </style>
+<meta charset="utf-8" />
+<script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+
+<style>
+body {
+  font-family: "Segoe UI", Arial, sans-serif;
+  padding: 16px;
+  background: #f7f7f9;
+}
+
+h2 {
+  margin-bottom: 10px;
+}
+
+.section {
+  margin-bottom: 20px;
+}
+
+input[type="text"],
+input[type="date"] {
+  width: 100%;
+  padding: 8px;
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.time-group {
+  margin-top: 10px;
+}
+
+.time-label {
+  font-weight: 600;
+  margin: 10px 0 5px;
+}
+
+.slots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.slot {
+  padding: 6px 12px;
+  border-radius: 20px;
+  background: #e4e4e7;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.slot:hover {
+  background: #d4d4d8;
+}
+
+.slot.selected {
+  background: #6b21a8;
+  color: white;
+}
+
+.summary {
+  background: #ececf1;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+button {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+}
+
+.primary {
+  background: #6b21a8;
+  color: white;
+}
+
+.secondary {
+  background: white;
+  border: 1px solid #6b21a8;
+  color: #6b21a8;
+}
+</style>
 </head>
+
 <body>
 
-<h2>Talkdesk Scheduler</h2>
+<h2>New Appointment</h2>
 
-<label>Customer Name:</label><br/>
-<input type="text" id="customer" /><br/><br/>
-
-<strong>Available Slots:</strong><br/>
-
-<div class="slot">
-  <input type="radio" name="slot" value="10:00 AM" /> 10:00 AM
-</div>
-<div class="slot">
-  <input type="radio" name="slot" value="11:00 AM" /> 11:00 AM
+<div class="section">
+  <label>Customer Name *</label>
+  <input type="text" id="customer" />
 </div>
 
-<button onclick="schedule()">Schedule Appointment</button>
+<div class="section">
+  <label>Select date *</label>
+  <input type="date" id="date" />
+</div>
 
-<p id="result"></p>
+<div class="section">
+  <div class="time-group">
+    <div class="time-label">AM</div>
+    <div class="slots" id="am-slots"></div>
+  </div>
+
+  <div class="time-group">
+    <div class="time-label">PM</div>
+    <div class="slots" id="pm-slots"></div>
+  </div>
+</div>
+
+<div class="section summary" id="summary" style="display:none;"></div>
+
+<div class="buttons">
+  <button class="secondary">Previous</button>
+  <button class="primary" onclick="schedule()">Next</button>
+</div>
 
 <script>
-  async function schedule() {
-    const customer = document.getElementById("customer").value;
-    const slot = document.querySelector('input[name="slot"]:checked');
+const amTimes = ["09:00","09:30","10:00","10:30","11:00","11:30"];
+const pmTimes = ["12:00","12:30","01:00","01:30","02:00","02:30","03:00","03:30","04:00","04:30"];
 
-    if (!customer || !slot) {
-      alert("Please fill all fields");
-      return;
-    }
+let selectedTime = null;
 
-    // Mock API response
-    const response = {
-      id: "mock-12345",
-      status: "confirmed",
-      slot: slot.value
-    };
+function createSlots(times, containerId) {
+  const container = document.getElementById(containerId);
+  times.forEach(time => {
+    const div = document.createElement("div");
+    div.className = "slot";
+    div.innerText = time;
+    div.onclick = () => selectTime(div, time);
+    container.appendChild(div);
+  });
+}
 
-    document.getElementById("result").innerText =
-      "Appointment confirmed for " + customer +
-      " at " + response.slot + " ✔";
-  }
+function selectTime(element, time) {
+  document.querySelectorAll(".slot").forEach(s => s.classList.remove("selected"));
+  element.classList.add("selected");
+  selectedTime = time;
+  updateSummary();
+}
+
+function updateSummary() {
+  const customer = document.getElementById("customer").value;
+  const date = document.getElementById("date").value;
+
+  if (!customer || !date || !selectedTime) return;
+
+  const summary = document.getElementById("summary");
+  summary.style.display = "block";
+  summary.innerHTML = `
+    <strong>Appointment time</strong><br/>
+    ${date} at ${selectedTime} - (30 min)<br/>
+    Specialist: Sandra M
+  `;
+}
+
+function schedule() {
+  updateSummary();
+  alert("Mock appointment scheduled ✔");
+}
+
+document.getElementById("customer").addEventListener("input", updateSummary);
+document.getElementById("date").addEventListener("change", updateSummary);
+
+createSlots(amTimes, "am-slots");
+createSlots(pmTimes, "pm-slots");
 </script>
 
 </body>
